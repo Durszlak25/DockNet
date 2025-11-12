@@ -8,30 +8,70 @@
     tools:context=".MainActivity"
     android:fitsSystemWindows="true">
 
+    <!-- Constrain the whole LinearLayout to the ConstraintLayout so it lays out correctly -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:id="@+id/content_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="8dp">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="DockNet"/>
+            android:text="DockNet"
+            android:textSize="20sp"
+            android:paddingBottom="8dp" />
+
+        <!-- Text field used to filter/populate the RecyclerView list -->
         <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:id="@+id/search_bar"
-            />
+            android:id="@+id/searchList"
+            android:hint="Filter list" />
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="search"
-            android:id="@+id/search_button"/>
+            android:id="@+id/submitList"
+            android:layout_marginTop="8dp" />
+
+        <!-- RecyclerView for showing the scrollable list of items (button-like) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp" />
+
+        <!-- Existing single-system search controls -->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/search_bar"
+            android:hint="Lookup system by exact name"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="search"
+            android:id="@+id/search_button"
+            android:layout_marginTop="8dp" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/result"
-            />
-    </LinearLayout>
+            android:layout_marginTop="12dp" />
 
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
