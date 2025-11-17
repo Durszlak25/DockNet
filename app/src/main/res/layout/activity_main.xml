@@ -5,73 +5,87 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".MainActivity">
 
-    <!-- Constrain the whole LinearLayout to the ConstraintLayout so it lays out correctly -->
-    <LinearLayout
-        android:id="@+id/content_container"
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:padding="16dp"
+        android:text="DockNet"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/searchList"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:autofillHints="no"
+        android:hint="Search for a system (min 3 chars)"
+        android:inputType="text"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_text" />
+
+    <Button
+        android:id="@+id/submitList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="Search"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/searchList"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/searchList"
+        tools:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="16dp"
+        android:background="@drawable/recycler_border"
+        android:clipToPadding="false"
+        android:padding="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/star_image"
         app:layout_constraintEnd_toEndOf="parent"
-        android:padding="8dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchList"
+        app:layout_constraintVertical_weight="1" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DockNet"
-            android:textSize="20sp"
-            android:paddingBottom="8dp" />
+    <ImageView
+        android:id="@+id/star_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp"
+        android:contentDescription="Star type image"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/result"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recycler_view"
+        tools:src="@tools:sample/avatars"
+        tools:visibility="visible" />
 
-        <!-- Text field used to filter/populate the RecyclerView list -->
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/searchList"
-            android:hint="Filter list" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="search"
-            android:id="@+id/submitList"
-            android:layout_marginTop="8dp" />
-
-        <!-- RecyclerView for showing the scrollable list of items (button-like) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp" />
-
-        <!-- Existing single-system search controls -->
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/search_bar"
-            android:hint="Lookup system by exact name"
-            android:layout_marginTop="12dp" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="search"
-            android:id="@+id/search_button"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/result"
-            android:layout_marginTop="12dp" />
-
-    </LinearLayout>
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="?android:attr/detailsElementBackground"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/star_image"
+        tools:text="System info will appear here." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
