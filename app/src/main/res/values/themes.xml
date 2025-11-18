@@ -3,6 +3,9 @@
     <style name="Base.Theme.DockNet" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:fontFamily">@font/app_font</item>
+        <item name="android:windowBackground">@color/dark_grey</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="Theme.DockNet" parent="Base.Theme.DockNet" />

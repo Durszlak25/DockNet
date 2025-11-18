@@ -1,18 +1,25 @@
 package com.example.docknet;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,11 +48,14 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView result;
+    private TextView result, title;
     private EditText searchList;
     private ImageView starImage;
 
+    private Button changeToSystemInfo, changeToStarsList;
+
     private RecyclerView recyclerView;
+    private ListView starsListView;
     private MyAdapter adapter;
     private final List<String> masterItems = new ArrayList<>();
     private final List<String> items = new ArrayList<>();
@@ -54,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private static final Map<String, Integer> starImageMap = new HashMap<>();
 
     static {
-        // Zmapuj nazwy typów gwiazd na identyfikatory zasobów drawable.
-        // Upewnij się, że masz pliki o tych nazwach (np. star_o.png) w res/drawable.
         starImageMap.put("o (blue-white) star", R.drawable.star_1);
         starImageMap.put("b (blue-white) star", R.drawable.star_2);
         starImageMap.put("b (blue-white super giant) star", R.drawable.star_2);
@@ -106,25 +114,61 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        setupMainView();
+    }
+
+    private void setupMainView() {
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        changeToSystemInfo = findViewById(R.id.change_to_system_info);
+        changeToSystemInfo.setOnClickListener(v -> setupSystemInfo());
+
+        changeToStarsList = findViewById(R.id.change_to_stars_list);
+        changeToStarsList.setOnClickListener(v -> setupStarsList());
+    }
+
+    private void setupSystemInfo() {
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.system_info);
         result = findViewById(R.id.result);
         searchList = findViewById(R.id.searchList);
         recyclerView = findViewById(R.id.recycler_view);
         starImage = findViewById(R.id.star_image);
+
+        Animation RotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate);
+        starImage.startAnimation(RotateAnimation);
 
         setupRecyclerView();
         setupListeners();
 
         initSampleItems();
         resetAndShowMasterItems();
+        setupReturn();
     }
+
+    private void setupStarsList() {
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.stars_list);
+        starsListView = findViewById(R.id.stars_list_view);
+
+        List<Map.Entry<String, Integer>> starEntries = new ArrayList<>(starImageMap.entrySet());
+
+        StarListAdapter starAdapter = new StarListAdapter(this, starEntries);
+        starsListView.setAdapter(starAdapter);
+
+        setupReturn();
+    }
+
+    private void setupReturn() {
+        title = findViewById(R.id.title_text);
+        title.setOnClickListener(v -> setupMainView());
+    }
+
 
     private void setupRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyAdapter(items, (position, text) -> {
-            getSystemInfo(text);
-        });
+        adapter = new MyAdapter(items, (position, text) -> getSystemInfo(text));
         recyclerView.setAdapter(adapter);
     }
 
@@ -132,12 +176,10 @@ public class MainActivity extends AppCompatActivity {
         searchList.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Nie jest potrzebne
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Nie jest potrzebne
             }
 
             @Override
@@ -149,15 +191,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void initSampleItems() {
         masterItems.clear();
-        masterItems.add("Write down at least 3 chars");
+//        masterItems.add("Write down at least 3 chars");
     }
 
     private void resetAndShowMasterItems() {
         items.clear();
         items.addAll(masterItems);
-        adapter.notifyDataSetChanged();
-        starImage.setVisibility(View.GONE);
-        result.setText("");
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+        if (starImage != null) {
+            starImage.setVisibility(View.GONE);
+        }
+        if (result != null) {
+            result.setText("");
+        }
     }
 
     private void filterList(String name) {
@@ -280,8 +328,6 @@ public class MainActivity extends AppCompatActivity {
         return starImageMap.get(lowerCaseType);
     }
 
-    // --- Helper methods for buildDisplayFromJson ---
-
     private void appendTitle(StringBuilder sb, JSONObject obj) {
         String sysName = obj.optString("name", "Unknown");
         JSONObject pso = obj.optJSONObject("primaryStar");
@@ -352,8 +398,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // --- Adapter & ViewHolder ---
-
     public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.VH> {
         public interface OnItemClickListener {
             void onItemClick(int position, String text);
@@ -392,10 +436,49 @@ public class MainActivity extends AppCompatActivity {
 
         public static class VH extends RecyclerView.ViewHolder {
             TextView label;
+
             public VH(View itemView) {
                 super(itemView);
                 label = itemView.findViewById(R.id.item_text);
             }
+        }
+    }
+
+    private static class StarListAdapter extends ArrayAdapter<Map.Entry<String, Integer>> {
+
+        private static class ViewHolder {
+            ImageView starImageView;
+            TextView starNameView;
+        }
+
+        public StarListAdapter(Context context, List<Map.Entry<String, Integer>> stars) {
+            super(context, 0, stars);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            ViewHolder holder;
+
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.star_list_item, parent, false);
+                holder = new ViewHolder();
+                holder.starImageView = convertView.findViewById(R.id.star_list_image);
+                holder.starNameView = convertView.findViewById(R.id.star_list_name);
+                convertView.setTag(holder);
+
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            Map.Entry<String, Integer> entry = getItem(position);
+
+            if (entry != null) {
+                holder.starNameView.setText(entry.getKey());
+                holder.starImageView.setImageResource(entry.getValue());
+            }
+
+            return convertView;
         }
     }
 }
