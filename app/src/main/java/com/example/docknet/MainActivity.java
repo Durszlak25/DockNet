@@ -1,616 +1,196 @@
 package com.example.docknet;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Color;
-import android.media.Image;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.example.docknet.data.SystemRepository;
+import com.example.docknet.network.NetworkClient;
+import com.example.docknet.network.ServerStatusManager;
+import com.example.docknet.ui.AnimationHelper;
+import com.example.docknet.ui.SystemInfoController;
+import com.example.docknet.ui.ServerStatusController;
+import com.example.docknet.ui.StarsController;
+import com.example.docknet.ui.ShipsController;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Deque;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView result, title, lastUpdate;
-    private EditText searchList;
-    private ImageView starImage;
+    private TextView title;
 
-    private View statusView;
+    private final NetworkClient networkClient = new com.example.docknet.network.RetrofitNetworkClient();
+    private final SystemRepository systemRepository = new SystemRepository(networkClient);
+    private final ServerStatusManager serverStatusManager = new ServerStatusManager(networkClient);
+    private SystemInfoController systemInfoController;
+    private ServerStatusController serverStatusController;
+    private StarsController starsController;
 
-    private Button changeToSystemInfo, changeToStarsList;
+    private enum Screen { MAIN, SYSTEM_INFO, STARS, SHIPS }
+    private final Deque<Screen> navStack = new ArrayDeque<>();
 
-    private RecyclerView recyclerView;
-    private ListView starsListView;
-    private MyAdapter adapter;
-    private final List<String> masterItems = new ArrayList<>();
-    private final List<String> items = new ArrayList<>();
-
-    private final Executor backgroundExecutor = Executors.newSingleThreadExecutor();
-    private static final Map<String, Integer> starImageMap = new HashMap<>();
-
-    private final Object connectionLock = new Object();
-    private volatile HttpURLConnection currentConnection = null;
-    private final AtomicInteger requestCounter = new AtomicInteger(0);
-
-    static {
-        starImageMap.put("o (blue-white) star", R.drawable.star_1);
-        starImageMap.put("b (blue-white) star", R.drawable.star_2);
-        starImageMap.put("b (blue-white super giant) star", R.drawable.star_2);
-        starImageMap.put("a (blue-white) star", R.drawable.star_3);
-        starImageMap.put("a (blue-white super giant) star", R.drawable.star_3);
-        starImageMap.put("f (white) star", R.drawable.star_4);
-        starImageMap.put("f (white super giant) star", R.drawable.star_4);
-        starImageMap.put("g (white-yellow) star", R.drawable.star_5);
-        starImageMap.put("g (white-yellow super giant) star", R.drawable.star_5);
-        starImageMap.put("k (yellow-orange) star", R.drawable.star_6);
-        starImageMap.put("k (yellow-orange giant) star", R.drawable.star_6);
-        starImageMap.put("m (red dwarf) star", R.drawable.star_7);
-        starImageMap.put("m (red giant) star", R.drawable.star_7);
-        starImageMap.put("m (red super giant) star", R.drawable.star_7);
-        starImageMap.put("l (brown dwarf) star", R.drawable.star_8);
-        starImageMap.put("t (brown dwarf) star", R.drawable.star_9);
-        starImageMap.put("y (brown dwarf) star", R.drawable.star_10);
-        starImageMap.put("t tauri star", R.drawable.star_11);
-        starImageMap.put("herbig ae/be star", R.drawable.star_12);
-        starImageMap.put("wolf-rayet n star", R.drawable.star_22);
-        starImageMap.put("wolf-rayet nc star", R.drawable.star_23);
-        starImageMap.put("wolf-rayet c star", R.drawable.star_24);
-        starImageMap.put("wolf-rayet o star", R.drawable.star_25);
-        starImageMap.put("c star", R.drawable.star_32);
-        starImageMap.put("cn star", R.drawable.star_33);
-        starImageMap.put("cj star", R.drawable.star_42);
-        starImageMap.put("ms-type star", R.drawable.star_42);
-        starImageMap.put("s-type star", R.drawable.star_42);
-        starImageMap.put("white dwarf (d) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (da) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dab) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (daz) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dav) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (db) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dbz) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dbv) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (do) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dov) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dq) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dc) star", R.drawable.star_51);
-        starImageMap.put("white dwarf (dcv) star", R.drawable.star_51);
-        starImageMap.put("neutron star", R.drawable.star_91);
-        starImageMap.put("black hole", R.drawable.star_92);
-        starImageMap.put("supermassive black hole", R.drawable.star_92);
+    private void pushScreen(Screen s) {
+        // push only if different from current top
+        if (navStack.isEmpty() || navStack.peek() != s) {
+            navStack.push(s);
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setupMainView();
+        // register back callback to handle navigation within single Activity
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // hide keyboard first
+                hideKeyboard();
+
+                if (navStack.size() > 1) {
+                    // pop current
+                    navStack.pop();
+                    Screen prev = navStack.peek();
+                    if (prev == Screen.MAIN) {
+                        setupMainView();
+                    } else if (prev == Screen.SYSTEM_INFO) {
+                        setupSystemInfo();
+                    } else if (prev == Screen.STARS) {
+                        setupStarsList();
+                    } else if (prev == Screen.SHIPS) {
+                        setupShipsList();
+                    } else {
+                        finish();
+                    }
+                } else {
+                    // nothing to go back to — finish activity
+                    finish();
+                }
+            }
+        });
+
+        // restore nav stack if available (after rotation)
+        if (savedInstanceState != null) {
+            ArrayList<String> saved = savedInstanceState.getStringArrayList("navStack");
+            if (saved != null && !saved.isEmpty()) {
+                navStack.clear();
+                // saved list has top at index 0 -> push from last to first to restore stack
+                for (int i = saved.size() - 1; i >= 0; i--) {
+                    try { navStack.push(Screen.valueOf(saved.get(i))); } catch (Exception ignored) {}
+                }
+                // show top
+                Screen top = navStack.peek();
+                if (top == Screen.SYSTEM_INFO) setupSystemInfo();
+                else if (top == Screen.STARS) setupStarsList();
+                else if (top == Screen.SHIPS) setupShipsList();
+                else setupMainView();
+            } else {
+                setupMainView();
+            }
+        } else {
+            setupMainView();
+        }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // shutdown repository and cancel any network operations to avoid leaks
+        systemRepository.shutdown();
+        serverStatusManager.shutdown();
+        if (systemInfoController != null) systemInfoController.teardown();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // save navStack order (top at index 0)
+        if (!navStack.isEmpty()) {
+            ArrayList<String> list = new ArrayList<>();
+            for (Screen s : navStack) list.add(s.name());
+            outState.putStringArrayList("navStack", list);
+        }
+    }
 
     private void setupMainView() {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        setServerStatus();
+        // delegate server status to controller
+        serverStatusController = new ServerStatusController(this, serverStatusManager);
+        serverStatusController.setup();
 
-        changeToSystemInfo = findViewById(R.id.change_to_system_info);
+        Button changeToSystemInfo = findViewById(R.id.change_to_system_info);
         changeToSystemInfo.setOnClickListener(v -> setupSystemInfo());
 
-        changeToStarsList = findViewById(R.id.change_to_stars_list);
+        Button changeToStarsList = findViewById(R.id.change_to_stars_list);
         changeToStarsList.setOnClickListener(v -> setupStarsList());
-    }
 
-    private void setServerStatus(){
-        lastUpdate = findViewById(R.id.server_status_text);
-        statusView = findViewById(R.id.server_status_image);
+        Button changeToShipsList = findViewById(R.id.change_to_ships_list);
+        changeToShipsList.setOnClickListener(v -> setupShipsList());
 
-        backgroundExecutor.execute(() -> {
-            HttpURLConnection connection = null;
-            try {
-                String urlString = "https://www.edsm.net/api-status-v1/elite-server";
-                URL url = new URL(urlString);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
-                connection.connect();
-
-                String jsonResponse = readStream(connection.getInputStream());
-                JSONObject statusObj = new JSONObject(jsonResponse);
-
-                String lastUpdateTime = statusObj.optString("lastUpdate", "Unknown");
-                String rawState = statusObj.optString("type", "");
-                final String state = rawState.toLowerCase(Locale.ROOT);
-
-                final int color;
-                switch (state) {
-                    case "success":
-                        color = Color.parseColor("#00FF00"); // green
-                        break;
-                    case "warning":
-                        color = Color.parseColor("#FF9800"); // orange
-                        break;
-                    case "danger":
-                        color = Color.parseColor("#FF0000"); // red
-                        break;
-                    default:
-                        color = Color.parseColor("#000000");
-                        break;
-                }
-
-                runOnUiThread(() -> {
-                    if (lastUpdate != null) {
-                        lastUpdate.setText(lastUpdateTime);
-                    }
-                    if (statusView != null) {
-                        statusView.setBackgroundColor(color);
-                    }
-                });
-
-            } catch (IOException | JSONException e) {
-                Log.e("MainActivity", "Failed to fetch server status", e);
-                runOnUiThread(() -> {
-                    if (lastUpdate != null) {
-                        lastUpdate.setText("Server status unavailable");
-                    }
-                    if (statusView != null) {
-                        statusView.setBackgroundColor(Color.parseColor("#666666"));
-                    }
-                });
-            } finally {
-                if (connection != null) {
-                    try {
-                        connection.disconnect();
-                    } catch (Exception ignored) {}
-                }
-            }
-        });
+        // navigation stack update
+        pushScreen(Screen.MAIN);
     }
 
     private void setupSystemInfo() {
         EdgeToEdge.enable(this);
         setContentView(R.layout.system_info);
-        result = findViewById(R.id.result);
-        searchList = findViewById(R.id.searchList);
-        recyclerView = findViewById(R.id.recycler_view);
-        starImage = findViewById(R.id.star_image);
-
-        setupImageAnimation(starImage);
-
-        setupRecyclerView();
-        setupListeners();
-
-        initSampleItems();
-        resetAndShowMasterItems();
+        AnimationHelper.setupImageAnimation(findViewById(R.id.star_image));
+        // delegate detailed wiring to SystemInfoController to keep Activity slim
+        systemInfoController = new SystemInfoController(this, systemRepository);
+        systemInfoController.setup();
         setupReturn();
-    }
 
-    private static void setupImageAnimation(ImageView image){
-        ObjectAnimator animator = ObjectAnimator.ofFloat(image, "rotation", 0f, 360f);
-        animator.setDuration(13000);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.setInterpolator(new LinearInterpolator());
-        image.post(() -> animator.start());
+        // navigation stack update
+        pushScreen(Screen.SYSTEM_INFO);
     }
 
     private void setupStarsList() {
         EdgeToEdge.enable(this);
         setContentView(R.layout.stars_list);
-        starsListView = findViewById(R.id.stars_list_view);
-
-        List<Map.Entry<String, Integer>> starEntries = new ArrayList<>(starImageMap.entrySet());
-
-        StarListAdapter starAdapter = new StarListAdapter(this, starEntries);
-        starsListView.setAdapter(starAdapter);
+        starsController = new StarsController(this);
+        starsController.setup();
 
         setupReturn();
+
+        // navigation stack update
+        pushScreen(Screen.STARS);
+    }
+
+    private void setupShipsList() {
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.ships_list);
+        ShipsController controller = new ShipsController(this);
+        controller.setup();
+        setupReturn();
+
+        pushScreen(Screen.SHIPS);
     }
 
     private void setupReturn() {
         title = findViewById(R.id.title_text);
-        title.setOnClickListener(v -> setupMainView());
+        title.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
-
-    private void setupRecyclerView() {
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyAdapter(items, (position, text) -> getSystemInfo(text));
-        recyclerView.setAdapter(adapter);
-    }
-
-    private void setupListeners() {
-        searchList.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                filterList(s.toString());
-            }
-        });
-    }
-
-    private void initSampleItems() {
-        masterItems.clear();
-//        masterItems.add("Write down at least 3 chars");
-    }
-
-    private void resetAndShowMasterItems() {
-        items.clear();
-        items.addAll(masterItems);
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
-        if (starImage != null) {
-            starImage.setVisibility(View.GONE);
-        }
-        if (result != null) {
-            result.setText("");
+    private void hideKeyboard() {
+        View v = getCurrentFocus();
+        if (v == null) v = findViewById(android.R.id.content);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && v != null) {
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            v.clearFocus();
         }
     }
 
-    private void cancelOngoingRequest() {
-        synchronized (connectionLock) {
-            if (currentConnection != null) {
-                try {
-                    currentConnection.disconnect();
-                } catch (Exception ignored) {
-                } finally {
-                    currentConnection = null;
-                }
-            }
-        }
-    }
-
-    private void filterList(String name) {
-        cancelOngoingRequest();
-        final int myRequestId = requestCounter.incrementAndGet();
-
-        if (name.length() < 3) {
-            if (myRequestId == requestCounter.get()) {
-                resetAndShowMasterItems();
-            }
-            return;
-        }
-
-        backgroundExecutor.execute(() -> {
-            try {
-                String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8.toString());
-                String urlString = "https://www.edsm.net/api-v1/systems?systemName=" + encodedName + "&showInformation=1&showCoordinates=1&showPrimaryStar=1";
-                String jsonResponse = performApiRequest(urlString);
-                List<String> systemNames = parseSystemListFromJson(jsonResponse);
-
-                runOnUiThread(() -> {
-                    if (myRequestId != requestCounter.get()) return;
-
-                    if (systemNames.isEmpty()) {
-                        items.clear();
-                        items.add("No systems found");
-                    } else {
-                        items.clear();
-                        items.addAll(systemNames);
-                    }
-                    adapter.notifyDataSetChanged();
-                });
-            } catch (IOException | JSONException e) {
-                runOnUiThread(() -> {
-                    if (myRequestId != requestCounter.get()) return;
-                    items.clear();
-                    items.add("Error: " + e.getMessage());
-                    adapter.notifyDataSetChanged();
-                });
-            }
-        });
-    }
-
-    private void getSystemInfo(String systemName) {
-        cancelOngoingRequest();
-        final int myRequestId = requestCounter.incrementAndGet();
-
-        backgroundExecutor.execute(() -> {
-            try {
-                String encodedName = URLEncoder.encode(systemName, StandardCharsets.UTF_8.toString());
-                String urlString = "https://www.edsm.net/api-v1/system?systemName=" + encodedName + "&showInformation=1&showCoordinates=1&showPrimaryStar=1";
-                String jsonResponse = performApiRequest(urlString);
-                JSONObject systemObject = new JSONObject(jsonResponse);
-                String displayText = buildDisplayFromJson(systemObject);
-
-                JSONObject pso = systemObject.optJSONObject("primaryStar");
-                String starType = pso != null ? pso.optString("type", "") : "";
-                Integer imageResId = getStarImageResId(starType);
-
-                runOnUiThread(() -> {
-                    if (myRequestId != requestCounter.get()) return; // stale
-                    result.setText(displayText);
-                    if (imageResId != null) {
-                        starImage.setVisibility(View.VISIBLE);
-                        Glide.with(MainActivity.this)
-                                .load(imageResId)
-                                .into(starImage);
-                    } else {
-                        starImage.setVisibility(View.GONE);
-                    }
-                });
-            } catch (IOException | JSONException e) {
-                runOnUiThread(() -> {
-                    if (myRequestId != requestCounter.get()) return;
-                    result.setText("Error fetching system details: " + e.getMessage());
-                });
-            }
-        });
-    }
-
-    private String performApiRequest(String urlString) throws IOException {
-        HttpURLConnection connection = null;
-        try {
-            Log.d("LogApi", "Performing system search");
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            // expose connection so it can be disconnected from UI thread
-            synchronized (connectionLock) {
-                currentConnection = connection;
-            }
-            connection.setRequestMethod("GET");
-            connection.connect();
-            return readStream(connection.getInputStream());
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.disconnect();
-                } catch (Exception ignored) {}
-            }
-            synchronized (connectionLock) {
-                if (currentConnection == connection) {
-                    currentConnection = null;
-                }
-            }
-            Log.d("LogApi", "Finished system search");
-        }
-    }
-
-    private String readStream(InputStream stream) throws IOException {
-        StringBuilder builder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-        }
-        return builder.toString();
-    }
-
-    private List<String> parseSystemListFromJson(String jsonResponse) throws JSONException {
-        List<String> systemNames = new ArrayList<>();
-        JSONArray jsonArray = new JSONArray(jsonResponse);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject systemObject = jsonArray.getJSONObject(i);
-            systemNames.add(systemObject.optString("name", ""));
-        }
-        return systemNames;
-    }
-
-    private String buildDisplayFromJson(JSONObject obj) {
-        try {
-            StringBuilder sb = new StringBuilder();
-            appendTitle(sb, obj);
-            appendStarInfo(sb, obj);
-            appendCoordinates(sb, obj);
-            appendSystemDetails(sb, obj);
-            return sb.toString().trim();
-        } catch (Exception e) {
-            return "Invalid JSON format";
-        }
-    }
-
-    private Integer getStarImageResId(String starType) {
-        if (starType == null || starType.isEmpty()) {
-            return null;
-        }
-        String lowerCaseType = starType.toLowerCase();
-        return starImageMap.get(lowerCaseType);
-    }
-
-    private void appendTitle(StringBuilder sb, JSONObject obj) {
-        String sysName = obj.optString("name", "Unknown");
-        JSONObject pso = obj.optJSONObject("primaryStar");
-        String starType = pso != null ? pso.optString("type", "") : "";
-        boolean scoopable = pso != null && pso.optBoolean("isScoopable", false);
-
-        sb.append(sysName);
-        if (!starType.isEmpty()) {
-            sb.append(" — ").append(starType);
-        }
-        if (scoopable) {
-            sb.append(" (scoopable)");
-        }
-        sb.append('\n');
-    }
-
-    private void appendStarInfo(StringBuilder sb, JSONObject obj) {
-        String sysName = obj.optString("name", "Unknown");
-        JSONObject pso = obj.optJSONObject("primaryStar");
-        if (pso != null) {
-            String starName = pso.optString("name", "");
-            if (!starName.isEmpty() && !starName.equals(sysName)) {
-                sb.append("Star: ").append(starName).append('\n');
-            }
-        }
-    }
-
-    private void appendCoordinates(StringBuilder sb, JSONObject obj) {
-        JSONObject coords = obj.optJSONObject("coords");
-        double x = coords != null ? coords.optDouble("x", 0) : 0;
-        double y = coords != null ? coords.optDouble("y", 0) : 0;
-        double z = coords != null ? coords.optDouble("z", 0) : 0;
-        boolean coordsLocked = obj.optBoolean("coordsLocked", false);
-
-        sb.append(String.format(Locale.US, "Coords: [%.2f, %.2f, %.2f]%s\n",
-                x, y, z, coordsLocked ? " (locked)" : ""));
-    }
-
-    private void appendSystemDetails(StringBuilder sb, JSONObject obj) {
-        JSONObject info = obj.optJSONObject("information");
-        if (info == null) return;
-
-        appendDetail(sb, "Allegiance", info.optString("allegiance"));
-        appendDetail(sb, "Government", info.optString("government"));
-        appendDetail(sb, "Faction", info.optString("faction"));
-        appendDetail(sb, "Faction State", info.optString("factionState"));
-        long population = info.optLong("population", -1);
-        if (population >= 0) {
-            sb.append("Population: ").append(String.format(Locale.US, "%,d", population)).append('\n');
-        }
-        appendDetail(sb, "Security", info.optString("security"));
-        String economy = info.optString("economy");
-        String secondEconomy = info.optString("secondEconomy");
-        if (!economy.isEmpty()) {
-            sb.append("Economy: ").append(economy);
-            if (!secondEconomy.isEmpty()) {
-                sb.append(" / ").append(secondEconomy);
-            }
-            sb.append('\n');
-        }
-        appendDetail(sb, "Reserve", info.optString("reserve"));
-    }
-
-    private void appendDetail(StringBuilder sb, String label, String value) {
-        if (value != null && !value.isEmpty()) {
-            sb.append(label).append(": ").append(value).append('\n');
-        }
-    }
-
-
-    public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.VH> {
-        public interface OnItemClickListener {
-            void onItemClick(int position, String text);
-        }
-
-        private final List<String> data;
-        private final OnItemClickListener listener;
-
-        public MyAdapter(List<String> data, OnItemClickListener listener) {
-            this.data = data;
-            this.listener = listener;
-        }
-
-        @NonNull
-        @Override
-        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false);
-            return new VH(v);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull VH holder, int position) {
-            final String text = data.get(position);
-            holder.label.setText(text);
-            holder.itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onItemClick(holder.getAdapterPosition(), text);
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
-        }
-
-        public static class VH extends RecyclerView.ViewHolder {
-            TextView label;
-
-            public VH(View itemView) {
-                super(itemView);
-                label = itemView.findViewById(R.id.item_text);
-            }
-        }
-    }
-
-    private static class StarListAdapter extends ArrayAdapter<Map.Entry<String, Integer>> {
-
-        private static class ViewHolder {
-            ImageView starImageView;
-            TextView starNameView;
-        }
-
-        public StarListAdapter(Context context, List<Map.Entry<String, Integer>> stars) {
-            super(context, 0, stars);
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            ViewHolder holder;
-
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.star_list_item, parent, false);
-                holder = new ViewHolder();
-                holder.starImageView = convertView.findViewById(R.id.star_list_image);
-                holder.starNameView = convertView.findViewById(R.id.star_list_name);
-                convertView.setTag(holder);
-
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            Map.Entry<String, Integer> entry = getItem(position);
-
-            if (entry != null) {
-                holder.starNameView.setText(entry.getKey());
-                holder.starImageView.setImageResource(entry.getValue());
-                setupImageAnimation(holder.starImageView);
-            }
-
-            return convertView;
-        }
-    }
+    // search/filter logic moved into SystemInfoController
 }

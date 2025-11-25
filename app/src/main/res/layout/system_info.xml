@@ -69,6 +69,17 @@
         tools:src="@tools:sample/avatars"
         tools:visibility="visible" />
 
+    <ProgressBar
+        android:id="@+id/system_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/star_image"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <TextView
         android:id="@+id/result"
         android:layout_width="0dp"
@@ -79,7 +90,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/star_image"
+        app:layout_constraintTop_toBottomOf="@id/system_progress"
         tools:text="System info will appear here."
         android:backgroundTint="@color/dark_grey"
         android:textColor="@color/orange"/>

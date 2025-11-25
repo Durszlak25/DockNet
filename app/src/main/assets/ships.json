@@ -1,0 +1,71 @@
+﻿[
+  {
+    "Starter & Small Ships": [
+      { "name": "Sidewinder Mk I", "description": "Default starter ship, versatile but weak.", "file": "sidewinder_mk1.png" },
+      { "name": "Eagle Mk II", "description": "Light fighter, very agile but fragile.", "file": "eagle_mk2.png" },
+      { "name": "Imperial Eagle", "description": "Improved Eagle variant, faster and stronger.", "file": null },
+      { "name": "Hauler", "description": "Cheap cargo hauler, good for early trading.", "file": "hauler_1.png" },
+      { "name": "Adder", "description": "Affordable multi-role ship, decent for exploration and trading.", "file": "adder_1.png" }
+    ]
+  },
+  {
+    "Medium Multi-Role Ships": [
+      { "name": "Cobra Mk III", "description": "Classic all-rounder, fast and versatile.", "file": "cobra_mk_3_1.png" },
+      { "name": "Cobra Mk IV", "description": "Heavier Cobra variant, more internals but slower.", "file": "cobra_mk_4_1.png" },
+      { "name": "Viper Mk III", "description": "Fast combat ship, great for bounty hunting.", "file": "viper_mk_3_1.png" },
+      { "name": "Viper Mk IV", "description": "More durable Viper, less agile.", "file": "viper_mk_4_1.png" },
+      { "name": "Diamondback Scout", "description": "Light combat/exploration ship, agile but limited.", "file": "diamondback_scout_1.png" },
+      { "name": "Diamondback Explorer", "description": "Excellent jump range, great for deep-space exploration.", "file": "diamondback_explorer_1.png" },
+      { "name": "Asp Scout", "description": "Budget exploration ship, weaker than Asp Explorer.", "file": "asp_scout_1.png" },
+      { "name": "Asp Explorer", "description": "Top-tier exploration ship, long jump range and great cockpit.", "file": "asp_explorer_1.png" },
+      { "name": "Keelback", "description": "Small freighter with fighter bay option.", "file": "keelback_hangar_1.png" },
+      { "name": "Dolphin", "description": "Small passenger ship, affordable tourism option.", "file": "dolphin_1.png" },
+      { "name": "Imperial Courier", "description": "Fast Imperial ship, strong shields, good for combat.", "file": "imperial_courier.png" },
+      { "name": "Vulture", "description": "Dedicated combat ship, powerful weapons but limited internals.", "file": "vulture_1.png" }
+    ]
+  },
+  {
+    "Transport & Traders": [
+      { "name": "Type-6 Transporter", "description": "Cheap medium cargo hauler.", "file": null },
+      { "name": "Type-7 Transporter", "description": "Large cargo ship, requires medium pad.", "file": "type7_transporter_1.png" },
+      { "name": "Type-9 Heavy", "description": "Massive cargo capacity, very slow.", "file": "type_9_heavy.png" },
+      { "name": "Python", "description": "Versatile medium ship, excellent for trading and missions.", "file": "python_1.png" }
+    ]
+  },
+  {
+    "Passenger Liners": [
+      { "name": "Orca", "description": "Luxury passenger liner, sightseeing missions.", "file": "orca_1.png" },
+      { "name": "Beluga Liner", "description": "Largest passenger ship, multiple luxury cabins.", "file": "beluga_liner_1.png" }
+    ]
+  },
+  {
+    "Federal Ships": [
+      { "name": "Federal Dropship", "description": "Heavy combat ship, strong armor.", "file": "federal_dropship_1.png" },
+      { "name": "Federal Assault Ship", "description": "Combat-focused variant of Dropship.", "file": "federal_assault_1.png" },
+      { "name": "Federal Gunship", "description": "Gun-heavy Federal ship with fighter bay.", "file": "federal_gunship_2_1.png" },
+      { "name": "Federal Corvette", "description": "Top-tier Federal warship, extremely powerful.", "file": "fed_corvette_1.png" }
+    ]
+  },
+  {
+    "Imperial Ships": [
+      { "name": "Imperial Clipper", "description": "Fast Imperial trader, large internals.", "file": "imperial_clipper.png" },
+      { "name": "Imperial Cutter", "description": "Largest Imperial ship, huge cargo and shields.", "file": "imperial_cutter_1.png" }
+    ]
+  },
+  {
+    "Alliance Ships": [
+      { "name": "Alliance Chieftain", "description": "Combat ship, agile and powerful.", "file": "chieftain_ship.png" },
+      { "name": "Alliance Challenger", "description": "Heavier Chieftain variant, more armor.", "file": "alliance_challenger_1.png" },
+      { "name": "Alliance Crusader", "description": "Variant with fighter bay, versatile combat.", "file": "alliance_crusader.png" }
+    ]
+  },
+  {
+    "Large Multi-Role Ships": [
+      { "name": "Krait Mk II", "description": "Versatile combat/trader ship, fighter bay.", "file": "krait_mk2_1.png" },
+      { "name": "Krait Phantom", "description": "Exploration-focused Krait variant, excellent jump range.", "file": "krait_phantom_1.png" },
+      { "name": "Anaconda", "description": "Large multi-role ship, strong in combat and exploration.", "file": "anaconda_1.png" },
+      { "name": "Fer-de-Lance", "description": "Premier combat ship, heavy firepower, PvP favorite.", "file": null },
+      { "name": "Mamba", "description": "High-speed combat ship, strong firepower.", "file": "mamba_1.png" }
+    ]
+  }
+]

@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DockNet</string>
+    <string name="loading">Loading...</string>
+    <string name="server_status_unavailable">Server status unavailable</string>
+    <string name="error_fetching_system">Error fetching system details: %1$s</string>
+    <string name="error_fetching_system_retry">Error fetching system details: %1$s (tap to retry)</string>
+    <string name="no_systems_found">No systems found</string>
+    <string name="error_generic">Error: %1$s</string>
 </resources>
