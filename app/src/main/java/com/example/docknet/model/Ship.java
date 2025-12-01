@@ -3,7 +3,7 @@ package com.example.docknet.model;
 public class Ship {
     public final String name;
     public final String description;
-    public final Integer resId; // drawable resource id or null
+    public final Integer resId;
     public final String category;
 
     public Ship(String name, String description, Integer resId) {

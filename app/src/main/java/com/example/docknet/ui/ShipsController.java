@@ -26,7 +26,6 @@ public class ShipsController {
         EditText search = activity.findViewById(R.id.ship_search);
 
         adapter = new com.example.docknet.ui.ShipRecyclerAdapter((pos, ship) -> {
-            // show details dialog
             showDetails(ship);
         });
         rv.setLayoutManager(new LinearLayoutManager(activity));

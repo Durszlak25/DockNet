@@ -16,9 +16,7 @@ public class StarsController {
 
     public void setup() {
         RecyclerView starsRecycler = activity.findViewById(R.id.stars_list_view);
-        // adapter is local to this screen, final for clarity
         final StarRecyclerAdapter starAdapter = new StarRecyclerAdapter((pos, star) -> {
-            // noop or implement preview later
         });
         starsRecycler.setLayoutManager(new LinearLayoutManager(activity));
         starsRecycler.setAdapter(starAdapter);

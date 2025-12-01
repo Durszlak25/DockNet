@@ -24,4 +24,3 @@ public class Star {
         return result;
     }
 }
-

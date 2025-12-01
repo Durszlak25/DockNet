@@ -20,14 +20,10 @@ import com.example.docknet.viewmodel.SystemViewModel;
 import com.example.docknet.viewmodel.SystemViewModelFactory;
 
 import java.util.ArrayList;
+import android.text.Html;
+import java.util.Map;
+import java.util.Locale;
 
-/**
- * SystemInfoController - prosty, krok-po-kroku kontroler widoku 'system_info'.
- * Cel refaktoryzacji: uczynić kod łatwiejszym do wytłumaczenia i przejrzenia.
- * Zamiast jednej długiej metody "setup" rozbijamy logikę na małe, nazwane funkcje
- * (inicjalizacja widoków, adaptera, obserwatorów, watcher tekstu, itd.).
- * Zachowanie nie zostało zmienione — tylko struktura kodu i komentarze.
- */
 public class SystemInfoController {
     private final AppCompatActivity activity;
     private final SystemRepository repository;
@@ -40,48 +36,34 @@ public class SystemInfoController {
         this.repository = repository;
     }
 
-    /**
-     * Główna metoda konfigurująca ekran. Jest to wywoływane przy każdym wejściu na ekran.
-     * Ta metoda teraz deleguje pracę do wyraźnych, krótkich pomocników — łatwiej to
-     * opisać i wytłumaczyć w prezentacji.
-     */
     public void setup() {
-        // Pobierz referencje widoków (szybki, czytelny blok)
         TextView result = activity.findViewById(R.id.result);
         EditText searchList = activity.findViewById(R.id.searchList);
         RecyclerView recyclerView = activity.findViewById(R.id.recycler_view);
         ImageView starImage = activity.findViewById(R.id.star_image);
         View root = activity.findViewById(R.id.main);
 
-        // Jeśli pole wyszukiwania jest puste, natychmiast wyczyść interfejs, by
-        // uniknąć chwilowego wyświetlenia starego wyboru (tzw. flash).
         String initialQuery = searchList.getText() != null ? searchList.getText().toString().trim() : "";
 
-        // 1) Przygotuj UI tak, żeby nic nie migało — ukryj root i wyłącz restore state
         if (root != null) root.setVisibility(View.INVISIBLE);
         disableViewStateRestore(result, searchList, recyclerView, starImage);
         if (initialQuery.isEmpty()) {
             clearUiImmediately(result, starImage, searchList);
         }
 
-        // 2) Inicjalizacja elementów (animacje, adapter, layout manager)
         AnimationHelper.setupImageAnimation(starImage);
         initAdapter(recyclerView);
 
-        // 3) Przygotuj ViewModel i obserwatory
         viewModel = new ViewModelProvider(activity, new SystemViewModelFactory(repository)).get(SystemViewModel.class);
-        if (initialQuery.isEmpty()) viewModel.clearSelection(); // jeśli nie ma query, usuń selekcję
+        if (initialQuery.isEmpty()) viewModel.clearSelection();
         if (viewModel.shouldClearSelectionOnEnter()) {
             viewModel.clearSelection();
             viewModel.markInitialized();
         }
         attachObservers(result, starImage);
 
-        // 4) Ustaw watcher dla pola wyszukiwania
         setupSearchWatcher(searchList);
 
-        // 5) Na końcu, jeśli query jest pusty, upewnij się, że adapter i UI są puste;
-        //    w przeciwnym razie uruchom wyszukiwanie dla istniejącego query.
         if (initialQuery.isEmpty()) {
             adapter.submitList(new ArrayList<>());
             lastRequestedSystem = null;
@@ -90,13 +72,9 @@ public class SystemInfoController {
             search(initialQuery);
         }
 
-        // Zakończ inicjalizację i pokaż widok
         if (root != null) root.setVisibility(View.VISIBLE);
     }
 
-    // --------------------------- Helper methods ---------------------------
-
-    // Wyłącza automatyczne zapisywanie/przywracanie stanu widoków — upraszcza zachowanie
     private void disableViewStateRestore(View result, EditText searchList, RecyclerView recyclerView, ImageView starImage) {
         if (result != null) result.setSaveEnabled(false);
         if (searchList != null) searchList.setSaveEnabled(false);
@@ -104,14 +82,12 @@ public class SystemInfoController {
         if (starImage != null) starImage.setSaveEnabled(false);
     }
 
-    // Czyści UI natychmiast (używane gdy nie ma zapytania w polu wyszukiwania)
     private void clearUiImmediately(TextView result, ImageView starImage, EditText searchList) {
         if (result != null) result.setText("");
         if (starImage != null) starImage.setVisibility(View.GONE);
         if (searchList != null) searchList.setText("");
     }
 
-    // Inicjalizuje adapter i przypisuje go do RecyclerView
     private void initAdapter(RecyclerView recyclerView) {
         adapter = new SystemAdapter((position, text) -> {
             hideKeyboard();
@@ -119,11 +95,9 @@ public class SystemInfoController {
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         recyclerView.setAdapter(adapter);
-        // początkowo pusty - nie pokazujemy nic przed załadowaniem
         adapter.submitList(new ArrayList<>());
     }
 
-    // Podłącz obserwatory LiveData (systems, selectedSystem, loading, error)
     private void attachObservers(TextView result, ImageView starImage) {
         viewModel.getSystems().observe(activity, this::onSystemsUpdated);
         viewModel.getSelectedSystem().observe(activity, info -> onSelectedSystemChanged(info, result, starImage));
@@ -139,9 +113,8 @@ public class SystemInfoController {
     private void onSelectedSystemChanged(com.example.docknet.model.SystemInfo info, TextView result, ImageView starImage) {
         if (info != null) {
             com.example.docknet.model.SystemSummary sum = SystemParser.toSummary(info);
-            String displayText = SystemParser.formatSystemInfo(info);
-            if (sum != null) displayText += "\nDistance to Sol " + String.format(java.util.Locale.US, "%.2f", sum.distanceToSol);
-            if (result != null) result.setText(displayText);
+            String html = buildHtmlFromInfo(info, sum);
+            if (result != null) result.setText(Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY));
 
             Integer imageResId = com.example.docknet.ui.StarImageMapper.getResId(info.primaryStarType);
             if (imageResId != null && starImage != null) {
@@ -156,32 +129,48 @@ public class SystemInfoController {
         }
     }
 
-    private void onLoadingChanged(Boolean isLoading, android.widget.ProgressBar progress) {
-        if (progress != null) progress.setVisibility(Boolean.TRUE.equals(isLoading) ? View.VISIBLE : View.GONE);
-    }
+    private String buildHtmlFromInfo(com.example.docknet.model.SystemInfo info, com.example.docknet.model.SystemSummary sum) {
+        if (info == null) return "";
+        StringBuilder sb = new StringBuilder();
+        String header = info.name != null ? info.name : "Unknown";
+        if (info.primaryStarType != null && !info.primaryStarType.isEmpty()) header += " — " + info.primaryStarType;
+        if (info.isScoopable) header += " (scoopable)";
+        sb.append("<b><big>").append(Html.escapeHtml(header)).append("</big></b><br/>");
 
-    private void onErrorChanged(String err, TextView result) {
-        if (err != null) {
-            if (result != null) {
-                result.setText(activity.getString(R.string.error_fetching_system_retry, err));
-                result.setClickable(true);
-                result.setOnClickListener(v -> {
-                    if (lastRequestedSystem != null) fetchSystem(lastRequestedSystem);
-                });
+        Map<String, String> infoMap = info.information;
+        appendLabelHtml(sb, "Star", info.primaryStarName);
+        String coords = String.format(Locale.US, "[%.2f, %.2f, %.2f]%s",
+                info.x, info.y, info.z, info.coordsLocked ? " (locked)" : "");
+        appendLabelHtml(sb, "Coords", coords);
+
+        if (infoMap != null) {
+            appendLabelHtml(sb, "Allegiance", infoMap.get("allegiance"));
+            appendLabelHtml(sb, "Government", infoMap.get("government"));
+            appendLabelHtml(sb, "Faction", infoMap.get("faction"));
+            appendLabelHtml(sb, "Faction State", infoMap.get("factionState"));
+            if (info.population >= 0) appendLabelHtml(sb, "Population", String.format(Locale.US, "%,d", info.population));
+            appendLabelHtml(sb, "Security", infoMap.get("security"));
+            String economy = infoMap.get("economy");
+            String secondEconomy = infoMap.get("secondEconomy");
+            if (economy != null && !economy.isEmpty()) {
+                String econ = economy;
+                if (secondEconomy != null && !secondEconomy.isEmpty()) econ += " / " + secondEconomy;
+                appendLabelHtml(sb, "Economy", econ);
             }
+            appendLabelHtml(sb, "Reserve", infoMap.get("reserve"));
         }
+
+        if (sum != null) appendLabelHtml(sb, "Distance to Sol", String.format(Locale.US, "%.2f ly", sum.distanceToSol));
+
+        return sb.toString();
     }
 
-    // Ustawia prostego TextWatcher, który wywołuje `search()` po zmianie tekstu
-    private void setupSearchWatcher(EditText searchList) {
-        searchList.addTextChangedListener(new android.text.TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(android.text.Editable s) { search(s.toString()); }
-        });
+    private void appendLabelHtml(StringBuilder sb, String label, String value) {
+        if (value == null || value.isEmpty()) return;
+        sb.append("<b>").append(Html.escapeHtml(label)).append(":</b> ")
+          .append(Html.escapeHtml(value)).append("<br/>");
     }
 
-    // --------------------------- Existing public API ---------------------------
     public void search(String name) {
         if (name.length() < 3) {
             if (adapter != null) adapter.submitList(new ArrayList<>());
@@ -203,5 +192,33 @@ public class SystemInfoController {
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             v.clearFocus();
         }
+    }
+
+    private void onLoadingChanged(Boolean isLoading, android.widget.ProgressBar progress) {
+        if (progress != null) progress.setVisibility(Boolean.TRUE.equals(isLoading) ? View.VISIBLE : View.GONE);
+    }
+
+    private void onErrorChanged(String err, TextView result) {
+        if (err != null) {
+            if (result != null) {
+                result.setText(activity.getString(R.string.error_fetching_system_retry, err));
+                result.setClickable(true);
+                result.setOnClickListener(v -> {
+                    if (lastRequestedSystem != null) fetchSystem(lastRequestedSystem);
+                });
+            }
+        } else if (result != null) {
+            result.setClickable(false);
+            result.setOnClickListener(null);
+        }
+    }
+
+    private void setupSearchWatcher(EditText searchList) {
+        if (searchList == null) return;
+        searchList.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(android.text.Editable s) { search(s.toString()); }
+        });
     }
 }

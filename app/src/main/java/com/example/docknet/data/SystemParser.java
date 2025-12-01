@@ -121,7 +121,6 @@ public class SystemParser {
         systemMap.put("coordinatesLocked", info.coordsLocked ? "locked" : "");
         systemMap.put("population", String.valueOf(info.population));
 
-        // Distance calculation - use simple helper for clarity
         String distanceToSol = String.valueOf(calculateDistanceToOrigin(info.x, info.y, info.z));
         systemMap.put("distanceToSol", distanceToSol);
 
@@ -148,7 +147,6 @@ public class SystemParser {
     }
 
     private static double calculateDistanceToOrigin(double x, double y, double z) {
-        // Distance from origin (0,0,0) — clearer and what we need in this app
         return Math.sqrt(x * x + y * y + z * z);
     }
 

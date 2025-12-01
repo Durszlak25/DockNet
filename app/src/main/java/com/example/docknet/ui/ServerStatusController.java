@@ -11,8 +11,6 @@ import com.example.docknet.network.ServerStatusManager;
 import java.util.Locale;
 import android.graphics.Color;
 
-// Precomputed color constants (ARGB)
-// success: #20EE20, warning: #FF9800, danger: #FF0000, default: #000000, unavailable: #666666
 final class ServerColors {
     static final int SUCCESS = Color.parseColor("#20EE20");
     static final int WARNING = Color.parseColor("#FF9800");

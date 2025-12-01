@@ -2,5 +2,4 @@
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/app_logo" />
     <foreground android:drawable="@drawable/transparent" />
-    <monochrome android:drawable="@drawable/app_logo" />
 </adaptive-icon>

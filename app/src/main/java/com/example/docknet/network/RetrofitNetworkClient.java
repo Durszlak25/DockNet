@@ -28,7 +28,7 @@ public class RetrofitNetworkClient implements NetworkClient {
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://example.com/") // base won't be used because we pass full URL
+                .baseUrl("https://example.com/")
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
                 .client(client)

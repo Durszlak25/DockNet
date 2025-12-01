@@ -6,7 +6,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
 public class AnimationHelper {
-    private static final int TAG_ANIMATOR = -12345; // unikalny tag key
+    private static final int TAG_ANIMATOR = -12345;
 
     public static void setupImageAnimation(ImageView image) {
         if (image == null) return;

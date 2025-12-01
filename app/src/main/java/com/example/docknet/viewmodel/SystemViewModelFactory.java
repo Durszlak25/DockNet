@@ -22,4 +22,3 @@ public class SystemViewModelFactory implements ViewModelProvider.Factory {
         throw new IllegalArgumentException("Unknown ViewModel class");
     }
 }
-

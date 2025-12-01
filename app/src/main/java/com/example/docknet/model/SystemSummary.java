@@ -29,4 +29,3 @@ public class SystemSummary {
         this.allegiance = allegiance;
     }
 }
-

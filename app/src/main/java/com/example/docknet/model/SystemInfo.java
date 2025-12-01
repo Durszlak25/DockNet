@@ -14,4 +14,3 @@ public class SystemInfo {
 
     public SystemInfo() {}
 }
-

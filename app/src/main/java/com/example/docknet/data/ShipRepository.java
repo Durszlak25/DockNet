@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShipRepository {
-    // fallback static list
     public static List<Ship> getShips() {
         List<Ship> list = new ArrayList<>();
         list.add(new Ship("Adder", "Small, fast multipurpose ship.", R.drawable.adder_1));
@@ -53,7 +52,6 @@ public class ShipRepository {
                         final String file = o.optString("file", "");
                         Integer resId = null;
                         if (!file.isEmpty()) {
-                            // normalize file name to resource name (lowercase, replace non-alnum with underscore, strip extension)
                             final String base = file.replaceAll("\\.[^.]*$", "");
                             final String resName = base.toLowerCase().replaceAll("[^a-z0-9_]+", "_");
                             int id = ctx.getResources().getIdentifier(resName, "drawable", ctx.getPackageName());
@@ -64,7 +62,6 @@ public class ShipRepository {
                 }
             }
         } catch (Exception e) {
-            // fallback to static
             return getShips();
         }
         return list;

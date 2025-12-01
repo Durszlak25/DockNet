@@ -45,10 +45,23 @@ public class StarRecyclerAdapter extends ListAdapter<Star, StarRecyclerAdapter.V
         } else {
             holder.image.setImageResource(R.drawable.star_1);
         }
+        AnimationHelper.setupImageAnimation(holder.image);
         holder.itemView.setOnClickListener(v -> {
             int pos = holder.getBindingAdapterPosition();
             if (pos != RecyclerView.NO_POSITION && listener != null) listener.onStarClick(pos, star);
         });
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull VH holder) {
+        AnimationHelper.stopImageAnimation(holder.image);
+        super.onViewRecycled(holder);
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull VH holder) {
+        AnimationHelper.stopImageAnimation(holder.image);
+        super.onViewDetachedFromWindow(holder);
     }
 
     public static class VH extends RecyclerView.ViewHolder {

@@ -21,7 +21,6 @@ public class SystemViewModel extends ViewModel {
     private final MutableLiveData<String> error = new MutableLiveData<>();
     private boolean initialized = false;
 
-    // debouncer for search (Handler on main looper is simpler for UI-triggered debounce)
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable pendingRunnable = null;
     private static final long DEBOUNCE_MS = 300;
@@ -35,11 +34,7 @@ public class SystemViewModel extends ViewModel {
     public LiveData<Boolean> getLoading() { return loading; }
     public LiveData<String> getError() { return error; }
 
-    /**
-     * Schedule a search with debounce (defaults to 300ms). Cancel previous scheduled search.
-     */
     public void search(final String query) {
-        // remove previous pending runnable and post a new delayed one on the main thread
         if (pendingRunnable != null) {
             handler.removeCallbacks(pendingRunnable);
         }
@@ -85,26 +80,16 @@ public class SystemViewModel extends ViewModel {
         });
     }
 
-    /**
-     * Clear currently selected system and any error state.
-     * Should be called when entering the screen to avoid showing stale selection.
-     */
     public void clearSelection() {
         selectedSystem.postValue(null);
         error.postValue(null);
         loading.postValue(false);
     }
 
-    /**
-     * Return true if we should clear selection on entering the screen (only the first time).
-     */
     public boolean shouldClearSelectionOnEnter() {
         return !initialized;
     }
 
-    /**
-     * Mark the ViewModel as initialized (so subsequent enters — e.g. after rotation — won't clear selection).
-     */
     public void markInitialized() {
         initialized = true;
     }
