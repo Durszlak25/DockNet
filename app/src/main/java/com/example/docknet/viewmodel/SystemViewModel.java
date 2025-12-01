@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.docknet.data.SystemRepository;
-import com.example.docknet.data.SystemRepository.SystemResult;
+import com.example.docknet.model.SystemInfo;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -16,7 +16,7 @@ public class SystemViewModel extends ViewModel {
     private final SystemRepository repository;
 
     private final MutableLiveData<List<String>> systems = new MutableLiveData<>();
-    private final MutableLiveData<SystemResult> selectedSystem = new MutableLiveData<>();
+    private final MutableLiveData<SystemInfo> selectedSystem = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();
     private boolean initialized = false;
@@ -31,7 +31,7 @@ public class SystemViewModel extends ViewModel {
     }
 
     public LiveData<List<String>> getSystems() { return systems; }
-    public LiveData<SystemResult> getSelectedSystem() { return selectedSystem; }
+    public LiveData<SystemInfo> getSelectedSystem() { return selectedSystem; }
     public LiveData<Boolean> getLoading() { return loading; }
     public LiveData<String> getError() { return error; }
 
@@ -69,9 +69,9 @@ public class SystemViewModel extends ViewModel {
     public void fetchSystem(String name) {
         loading.postValue(true);
         error.postValue(null);
-        repository.getSystemInfo(name, new SystemRepository.RepositoryCallback<>() {
+        repository.getSystemInfo(name, new SystemRepository.RepositoryCallback<SystemInfo>() {
             @Override
-            public void onSuccess(SystemResult result) {
+            public void onSuccess(SystemInfo result) {
                 selectedSystem.postValue(result);
                 loading.postValue(false);
             }

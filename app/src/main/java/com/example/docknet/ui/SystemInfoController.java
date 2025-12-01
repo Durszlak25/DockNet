@@ -126,7 +126,7 @@ public class SystemInfoController {
     // Podłącz obserwatory LiveData (systems, selectedSystem, loading, error)
     private void attachObservers(TextView result, ImageView starImage) {
         viewModel.getSystems().observe(activity, this::onSystemsUpdated);
-        viewModel.getSelectedSystem().observe(activity, sr -> onSelectedSystemChanged(sr, result, starImage));
+        viewModel.getSelectedSystem().observe(activity, info -> onSelectedSystemChanged(info, result, starImage));
         android.widget.ProgressBar progress = activity.findViewById(R.id.system_progress);
         viewModel.getLoading().observe(activity, isLoading -> onLoadingChanged(isLoading, progress));
         viewModel.getError().observe(activity, err -> onErrorChanged(err, result));
@@ -136,14 +136,14 @@ public class SystemInfoController {
         if (adapter != null) adapter.submitList(list != null ? new ArrayList<>(list) : java.util.Collections.emptyList());
     }
 
-    private void onSelectedSystemChanged(com.example.docknet.data.SystemRepository.SystemResult sr, TextView result, ImageView starImage) {
-        if (sr != null) {
-            com.example.docknet.model.SystemSummary sum = SystemParser.toSummary(sr.info);
-            String displayText = SystemParser.formatSystemInfo(sr.info);
+    private void onSelectedSystemChanged(com.example.docknet.model.SystemInfo info, TextView result, ImageView starImage) {
+        if (info != null) {
+            com.example.docknet.model.SystemSummary sum = SystemParser.toSummary(info);
+            String displayText = SystemParser.formatSystemInfo(info);
             if (sum != null) displayText += "\nDistance to Sol " + String.format(java.util.Locale.US, "%.2f", sum.distanceToSol);
             if (result != null) result.setText(displayText);
 
-            Integer imageResId = com.example.docknet.ui.StarImageMapper.getResId(sr.primaryStarType);
+            Integer imageResId = com.example.docknet.ui.StarImageMapper.getResId(info.primaryStarType);
             if (imageResId != null && starImage != null) {
                 starImage.setVisibility(View.VISIBLE);
                 Glide.with(activity).load(imageResId).into(starImage);
