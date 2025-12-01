@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // ensure keyboard does not resize layouts; prefer manifest but set programmatically as fallback
+        getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         EdgeToEdge.enable(this);
         // register back callback to handle navigation within single Activity
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {

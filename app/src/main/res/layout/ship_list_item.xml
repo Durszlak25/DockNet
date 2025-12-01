@@ -11,7 +11,7 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_marginEnd="12dp"
-        android:contentDescription="Ship image" />
+        android:contentDescription="@string/ship_image_description" />
 
     <LinearLayout
         android:layout_width="0dp"

@@ -20,7 +20,6 @@ import com.example.docknet.viewmodel.SystemViewModelFactory;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.List;
 
 public class SystemInfoController {
     private final AppCompatActivity activity;
@@ -39,6 +38,26 @@ public class SystemInfoController {
         EditText searchList = activity.findViewById(R.id.searchList);
         RecyclerView recyclerView = activity.findViewById(R.id.recycler_view);
         ImageView starImage = activity.findViewById(R.id.star_image);
+        View root = activity.findViewById(R.id.main);
+
+        // Hide root while we initialize to avoid a brief flash of restored content
+        if (root != null) root.setVisibility(View.INVISIBLE);
+
+        // Disable save/restore of view state to avoid Android briefly restoring previous content
+        if (result != null) result.setSaveEnabled(false);
+        if (searchList != null) searchList.setSaveEnabled(false);
+        if (recyclerView != null) recyclerView.setSaveEnabled(false);
+        if (starImage != null) starImage.setSaveEnabled(false);
+
+        // If the search box is empty when entering the view, clear previous UI immediately
+        String initialQuery = searchList.getText() != null ? searchList.getText().toString().trim() : "";
+        if (initialQuery.isEmpty()) {
+            // clear visible UI synchronously to avoid showing stale data while observers attach
+            if (result != null) result.setText("");
+            if (starImage != null) starImage.setVisibility(View.GONE);
+            // also clear the EditText to prevent restored state showing old text
+            searchList.setText("");
+        }
 
         AnimationHelper.setupImageAnimation(starImage);
 
@@ -48,8 +67,14 @@ public class SystemInfoController {
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(activity));
         recyclerView.setAdapter(adapter);
+        // make sure adapter starts empty so RecyclerView doesn't briefly show prior items
+        if (adapter != null) adapter.submitList(new ArrayList<>());
 
         viewModel = new ViewModelProvider(activity, new SystemViewModelFactory(repository)).get(SystemViewModel.class);
+        // If there's no search query, clear the ViewModel selection BEFORE attaching observers
+        if (initialQuery.isEmpty()) {
+            viewModel.clearSelection();
+        }
         if (viewModel.shouldClearSelectionOnEnter()) {
             viewModel.clearSelection();
             viewModel.markInitialized();
@@ -109,6 +134,23 @@ public class SystemInfoController {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(android.text.Editable s) { search(s.toString()); }
         });
+
+        // If the search box is empty when entering the view, clear previous selection/results
+        if (initialQuery.isEmpty()) {
+            if (adapter != null) adapter.submitList(new ArrayList<>());
+            if (viewModel != null) viewModel.clearSelection();
+            lastRequestedSystem = null;
+            if (result != null) result.setText("");
+            if (starImage != null) starImage.setVisibility(View.GONE);
+            // explicitly clear the search box to avoid restored state showing previous text
+            searchList.setText("");
+        } else {
+            // populate based on existing query (if any)
+            search(initialQuery);
+        }
+
+        // Reveal the root after we've initialized and cleared any stale state
+        if (root != null) root.setVisibility(View.VISIBLE);
 
     }
 
