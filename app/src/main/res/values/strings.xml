@@ -31,4 +31,5 @@
     <string name="see_factions_in_a_system">See factions in a system</string>
     <string name="faction">Faction Lookup</string>
     <string name="docknet_systems">DockNet/Systems</string>
+    <string name="studio">studio</string>
 </resources>

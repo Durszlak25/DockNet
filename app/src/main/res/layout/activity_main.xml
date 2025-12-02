@@ -134,7 +134,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="20dp"
         android:gravity="center"
-
+        android:id="@+id/server_status"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -176,6 +176,22 @@
         </LinearLayout>
 
     </LinearLayout>
+    
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:contentDescription="@string/studio"
+        android:clickable="true"
+        android:tag="https://github.com/Regnum-Mortis"
+        app:layout_constraintTop_toBottomOf="@id/server_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/creators"
+        android:src="@drawable/studio_logo"
+        android:onClick="openBrowser"
+        >
+
+    </ImageView>
 
     <TextView
         android:id="@+id/creators"

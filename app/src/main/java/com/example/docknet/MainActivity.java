@@ -1,6 +1,8 @@
 package com.example.docknet;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -193,5 +195,20 @@ public class MainActivity extends AppCompatActivity {
     private void bindButton(int resId, Runnable action) {
         View v = findViewById(resId);
         if (v instanceof Button) v.setOnClickListener(x -> action.run());
+    }
+
+    public void openBrowser(View view){
+
+        //Get url from tag
+        String url = (String)view.getTag();
+
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+
+        //pass the url to intent data
+        intent.setData(Uri.parse(url));
+
+        startActivity(intent);
     }
 }
