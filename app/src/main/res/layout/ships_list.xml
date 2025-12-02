@@ -25,6 +25,7 @@
         android:hint="@string/search_ships"
         app:layout_constraintTop_toBottomOf="@id/title_text"
         android:textColorHint="@color/orange"
+        android:textColor="@color/orange"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"

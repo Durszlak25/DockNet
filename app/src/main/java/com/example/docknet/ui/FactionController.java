@@ -1,6 +1,8 @@
 package com.example.docknet.ui;
 
+import android.content.Context;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -117,6 +119,7 @@ public class FactionController {
                 });
             }
         }).start();
+
     }
 
     private List<Faction> parseFactions(String json) throws Exception {
@@ -196,6 +199,7 @@ public class FactionController {
     }
 
     private void showDetails(Faction f) {
+        hideKeyboard();
         if (f == null) return;
         android.view.LayoutInflater inflater = activity.getLayoutInflater();
         android.view.View view = inflater.inflate(R.layout.faction_detail, null);
@@ -219,6 +223,16 @@ public class FactionController {
         if (maybe instanceof android.widget.Button) {
             android.widget.Button ok = (android.widget.Button) maybe;
             ok.setOnClickListener(v -> dialog.dismiss());
+        }
+    }
+
+    private void hideKeyboard() {
+        View v = activity.getCurrentFocus();
+        if (v == null) v = activity.findViewById(android.R.id.content);
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && v != null) {
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            v.clearFocus();
         }
     }
 }
