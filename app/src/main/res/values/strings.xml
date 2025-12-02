@@ -13,7 +13,7 @@
     <string name="parse_error">Parse error: %1$s</string>
     <string name="server_status">Server status</string>
     <string name="last_update">Last update: </string>
-    <string name="creators">©️ Regnum Mortis</string>
+    <string name="creators">© Regnum Mortis</string>
     <string name="stars_lookup">Stars lookup</string>
     <string name="stars_description">See different Celestial bodies</string>
     <string name="ships_lookup">Ships lookup</string>
